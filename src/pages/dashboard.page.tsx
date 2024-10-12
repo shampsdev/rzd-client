@@ -32,7 +32,6 @@ export const DashboardPage = () => {
   const [, setTime] = useState(0);
   const timeRef = useRef(0); // Use a ref to keep track of time
   const [wagonWidth, setWagonWidth] = useState(0);
-  const [spread, setSpread] = useState(false);
 
   const wagonRef = useRef<HTMLImageElement>(null);
 
@@ -87,6 +86,7 @@ export const DashboardPage = () => {
     pollData();
   }, []);
 
+  const [spread, setSpread] = useState(false);
   const move = (n: number) => {
     setDeltaX((prev) => prev + wagonWidth * n);
   };
@@ -115,7 +115,7 @@ export const DashboardPage = () => {
 
   return (
     <>
-      <div className='mx-auto p-8'>
+      <div className='mx-auto px-8 pb-8'>
         <div className='flex justify-around flex-col md:flex-row gap-6'>
           <Card>
             <CardHeader>
@@ -240,7 +240,9 @@ export const DashboardPage = () => {
                 paddingLeft: `${spread ? '10px' : '5px'}`,
               }}
               transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              className='h-full w-full object-fill'
               src={wagon}
+              ref={wagonRef}
             />
             <motion.img
               animate={{
@@ -280,26 +282,39 @@ export const DashboardPage = () => {
           </div>
         </motion.div>
       </div>
-
-      <div className='mt-4 text-center space-x-5'>
-        <button
-          onClick={() => move(-1)} // Set the number of wagons to 6 for example
-          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
-        >
-          Move -1 Wagons
-        </button>
-        <button
-          onClick={() => setSpread((prev) => !prev)} // Set the number of wagons to 6 for example
-          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
-        >
-          Spread
-        </button>
-        <button
-          onClick={() => move(1)} // Set the number of wagons to 6 for example
-          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
-        >
-          Move 1 Wagons
-        </button>
+      <div className='p-4 flex justify-around m-12 rounded-xl'>
+        <Card>
+          <CardHeader>
+            <CardTitle className='font-thin'>audio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='font-black'>3aafc082-76ff-11ee-8209-c09bf4619c03.mp3</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className='font-thin'>text</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='font-black'>садить на десять вагонов</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className='font-thin'>label</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='font-black'>4</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className='font-thin'>attribute</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='font-black'>10</p>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
