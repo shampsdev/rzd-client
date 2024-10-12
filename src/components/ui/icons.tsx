@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import { twMerge } from "tailwind-merge";
+import { cn } from '@/lib/utils';
+import { twMerge } from 'tailwind-merge';
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 type ImageProps = React.HTMLAttributes<HTMLImageElement>;
@@ -12,7 +12,7 @@ export const Icons = {
       viewBox='0 0 21 21'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
-      className={cn("h-6 w-6", props.className)}
+      className={cn('h-6 w-6', props.className)}
       {...props}
     >
       <path
@@ -28,7 +28,7 @@ export const Icons = {
       viewBox='0 0 20 22'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
-      className={cn("h-6 w-6", props.className)}
+      className={cn('h-6 w-6', props.className)}
       {...props}
     >
       <path
@@ -46,7 +46,7 @@ export const Icons = {
       viewBox='0 0 23 18'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
-      className={cn("h-6 w-6", props.className)}
+      className={cn('h-6 w-6', props.className)}
       {...props}
     >
       <path
@@ -62,7 +62,7 @@ export const Icons = {
       viewBox='0 0 24 24'
       strokeWidth={1.5}
       stroke='currentColor'
-      className={cn("h-6 w-6", props.className)}
+      className={cn('h-6 w-6', props.className)}
       {...props}
     >
       <path
@@ -97,7 +97,7 @@ export const Icons = {
       viewBox='0 0 24 24'
       strokeWidth={1.5}
       stroke='currentColor'
-      className={cn("h-6 w-6", props.className)}
+      className={cn('h-6 w-6', props.className)}
       {...props}
     >
       <path
@@ -107,12 +107,12 @@ export const Icons = {
       />
     </svg>
   ),
-  logo: (props: IconProps) => (
+  shampsLogo: (props: IconProps) => (
     <svg
       viewBox='0 0 62 27'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
-      className={cn("w-[93px] h-[41px]", props.className)}
+      className={cn('w-[93px] h-[41px]', props.className)}
       {...props}
     >
       <path
@@ -334,12 +334,29 @@ export const Icons = {
       />
     </svg>
   ),
+  rzdLogo: (props: IconProps) => (
+    <svg
+      width='710'
+      height='265'
+      viewBox='0 0 710 265'
+      fill='none'
+      xmlns='http://www.w3.org/2000/svg'
+      {...props}
+    >
+      <path
+        fill-rule='evenodd'
+        clip-rule='evenodd'
+        d='M520 0H685V7.5H697.5V15H702.5V25H710V152.5H702.5V160H695V167.5V175H687.5V182.5H680V190H672.5V197.5H665V207.5H660V215H502.5V207.5H492.5V197.5H482.5V190H472.5V182.5H465V167.5H460V157.5H455V147.5H450V137.5H452.5V127.5H460V117.5H465V110H470V100H475V90H487.5V82.5H495V75H505V65H512.5V57.5H520V50H602.5V57.5H595V65H587.5V75H577.5V82.5H570V90H565V100H560V110H547.5V117.5H542.5V127.5H535V137.5H530V147.5H525V157.5H532.5V167.5H537.5V172.5H627.5V167.5H635V160H640V152.5H645V25H627.5V17.5H512.5V7.5H520V0ZM462.5 50H397.5V57.5H387.5V65H380V82.5H365V100H355V120H342.5V132.5H330V140H322.5V150H315V167.5H305V182.5H297.5V190H290V207.5H280V215H290H297.5H300H362.5V207.5H372.5V192.5H390V167.5H397.5V157.5H405V150H412.5V140H420V125H430V115H437.5V107.5H445V90H455V82.5H462.5V75H470V57.5H480V50H470H462.5ZM0 57.5H7.5V50H247.5V57.5H257.5V65H265V75H272.5V90H280V107.5H290V157.5H280V172.5H272.5V182.5H265V190H255V207.5H247.5V215H167.5H165H157.5H147.5V197.5H157.5V190H165V182.5H215V172.5H222.5V100H215V90H115V265H107.5H40H32.5V90H7.5H0V57.5Z'
+        fill='#FB3B22'
+      />
+    </svg>
+  ),
   computer: (props: ImageProps) => (
     <img
       src='/icons/computer.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -349,7 +366,7 @@ export const Icons = {
       src='/icons/trophey.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -359,7 +376,7 @@ export const Icons = {
       src='/icons/heart.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -369,7 +386,7 @@ export const Icons = {
       src='/icons/spyglass.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -379,7 +396,7 @@ export const Icons = {
       src='/icons/plane.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -389,7 +406,7 @@ export const Icons = {
       src='/logo-icons/1.png'
       alt='logo'
       className={twMerge(
-        "h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block",
+        'h-[1.5rem] w-[1.5rem] md:h-[2rem] md:w-[2rem] inline-block',
         props.className
       )}
     />
@@ -399,7 +416,7 @@ export const Icons = {
       src='/logo-icons/2.png'
       alt='logo'
       className={twMerge(
-        "h-[2rem] w-[2rem] inline-block object-contain",
+        'h-[2rem] w-[2rem] inline-block object-contain',
         props.className
       )}
     />
@@ -409,7 +426,7 @@ export const Icons = {
       src='/icons/coffee.png'
       alt='logo'
       className={twMerge(
-        "h-[2rem] w-[2rem] inline-block object-contain",
+        'h-[2rem] w-[2rem] inline-block object-contain',
         props.className
       )}
     />

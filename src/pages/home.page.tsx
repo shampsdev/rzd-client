@@ -27,7 +27,7 @@ export const HomePage = () => {
           setResponseLabel(label);
           setResponseAttribute(attribute);
 
-          const expectedLabel = LABELS[label];
+          // const expectedLabel = LABELS[label];
         }
       }
     };
@@ -66,7 +66,7 @@ export const HomePage = () => {
   };
 
   return (
-    <div className='w-full pt-[20%] flex flex-col items-center justify-center'>
+    <div className='w-full min-h-svh pt-[20%] flex flex-col items-center justify-center'>
       <p className='text-muted-foreground md:text-lg max-w-[90%] md:max-w-[70%] text-center mb-5'>
         Для старта записи нажмите на кнопку
       </p>

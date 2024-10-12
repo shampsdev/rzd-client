@@ -1,24 +1,20 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { useEffect, useRef, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Cpu, HardDrive, Clock, FileText, Activity } from "lucide-react";
-import { getServerHealth } from "@/api/get.health";
+} from '@/components/ui/chart';
+import { Cpu, HardDrive, Clock } from 'lucide-react';
+import { getServerHealth } from '@/api/get.health';
+
+import { motion } from 'framer-motion'; // Import Framer Motion
+
+import wagon from '../assets/wagon.svg';
+import locomotive from '../assets/locomotive.svg';
+import rails from '../assets/rails.svg';
 
 interface HealthData {
   time: number;
@@ -33,8 +29,22 @@ interface HealthData {
 
 export const DashboardPage = () => {
   const [healthData, setHealthData] = useState<HealthData[]>([]);
-  const [time, setTime] = useState(0);
+  const [, setTime] = useState(0);
   const timeRef = useRef(0); // Use a ref to keep track of time
+  const [wagonWidth, setWagonWidth] = useState(0);
+  const [spread, setSpread] = useState(false);
+
+  const wagonRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (wagonRef.current) {
+      const width = wagonRef.current.getBoundingClientRect().width;
+      setWagonWidth(width); // Set the width of the wagon in state
+      console.log('Wagon width:', width);
+    }
+  }, [wagonRef.current]);
+
+  const [deltaX, setDeltaX] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,7 +73,7 @@ export const DashboardPage = () => {
         timeRef.current += 1;
         setTime(timeRef.current); // Force a re-render by updating state
       } catch (error) {
-        console.error("Error fetching health data", error);
+        console.error('Error fetching health data', error);
       }
     };
 
@@ -77,6 +87,10 @@ export const DashboardPage = () => {
     pollData();
   }, []);
 
+  const move = (n: number) => {
+    setDeltaX((prev) => prev + wagonWidth * n);
+  };
+
   if (healthData.length === 0) {
     return (
       <div className='w-full pt-[20%] flex flex-col items-center justify-center'>
@@ -87,12 +101,12 @@ export const DashboardPage = () => {
 
   const latestData = healthData[healthData.length - 1];
 
-  const formatBytes = (bytes: any) => {
+  const formatBytes = (bytes: number) => {
     const gb = bytes / (1024 * 1024 * 1024);
     return `${gb.toFixed(2)} GB`;
   };
 
-  const formatSeconds = (seconds: any) => {
+  const formatSeconds = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = Math.floor(seconds % 60);
@@ -100,90 +114,26 @@ export const DashboardPage = () => {
   };
 
   return (
-    <div className='p-8 min-h-screen'>
-      <h1 className='text-3xl font-bold mb-6'>Server Health Dashboard</h1>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>RAM Usage</CardTitle>
-            <HardDrive className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {latestData.ram_usage.toFixed(2)}%
-            </div>
-            <Progress
-              value={latestData.ram_usage}
-              className='mt-2'
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>CPU Usage</CardTitle>
-            <Cpu className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {latestData.cpu_usage.toFixed(2)}%
-            </div>
-            <Progress
-              value={latestData.cpu_usage}
-              className='mt-2'
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Memory</CardTitle>
-            <HardDrive className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatBytes(latestData.available_memory * 1024 * 1024 * 1024)}
-            </div>
-            <p className='text-xs text-muted-foreground mt-1'>
-              of {formatBytes(latestData.total_memory * 1024 * 1024 * 1024)}{" "}
-              Available
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
-              Process Uptime
-            </CardTitle>
-            <Clock className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>
-              {formatSeconds(latestData.process_uptime)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <div className='mt-6'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Resource Usage Over Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                ram: {
-                  label: "RAM Usage",
-                  color: "hsl(var(--chart-1))",
-                },
-                cpu: {
-                  label: "CPU Usage",
-                  color: "hsl(var(--chart-2))",
-                },
-              }}
-              className='h-[300px]'
-            >
-              <ResponsiveContainer
-                width='100%'
-                height='100%'
+    <>
+      <div className='mx-auto p-8'>
+        <div className='flex justify-around flex-col md:flex-row gap-6'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Resource Usage Over Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={{
+                  ram: {
+                    label: 'RAM Usage',
+                    color: 'hsl(var(--chart-1))',
+                  },
+                  cpu: {
+                    label: 'CPU Usage',
+                    color: 'hsl(var(--chart-2))',
+                  },
+                }}
+                className='h-[300px]'
               >
                 <LineChart data={healthData}>
                   <CartesianGrid strokeDasharray='3 3' />
@@ -208,31 +158,149 @@ export const DashboardPage = () => {
                     name='CPU Usage'
                   />
                 </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+          <div className='grid grid-cols-2 lg:grid-cols-2 gap-6'>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>RAM Usage</CardTitle>
+                <HardDrive className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {latestData.ram_usage.toFixed(2)}%
+                </div>
+                <Progress value={latestData.ram_usage} className='mt-2' />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>CPU Usage</CardTitle>
+                <Cpu className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {latestData.cpu_usage.toFixed(2)}%
+                </div>
+                <Progress value={latestData.cpu_usage} className='mt-2' />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>Memory</CardTitle>
+                <HardDrive className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {formatBytes(
+                    latestData.available_memory * 1024 * 1024 * 1024
+                  )}
+                </div>
+                <p className='text-xs text-muted-foreground mt-1'>
+                  of {formatBytes(latestData.total_memory * 1024 * 1024 * 1024)}{' '}
+                  Available
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>
+                  Process Uptime
+                </CardTitle>
+                <Clock className='h-4 w-4 text-muted-foreground' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {formatSeconds(latestData.process_uptime)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mt-6'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Thread Count</CardTitle>
-            <Activity className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{latestData.thread_count}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Open Files</CardTitle>
-            <FileText className='h-4 w-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{latestData.open_files}</div>
-          </CardContent>
-        </Card>
+      <div className='h-[3px] mb-2 rounded-full w-36 mx-auto bg-[#B3B3B3]'></div>
+      <div className='w-[100vw] flex justify-center relative h-20 overflow-hidden'>
+        <img
+          className='h-[55%] w-[150vw] object-cover absolute -translate-y-[50%] top-[50%]'
+          src={rails}
+          alt=''
+        />
+        <motion.div
+          animate={{ x: `${deltaX}px`, y: '-50%' }}
+          transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+          className='absolute flex items-center h-full top-[50%]'
+          style={{ transform: `translateY(-50%)` }}
+        >
+          <div className='flex h-full'>
+            <motion.img
+              animate={{
+                padding: `5px`,
+                paddingRight: `${spread ? '10px' : '5px'}`,
+                paddingLeft: `${spread ? '10px' : '5px'}`,
+              }}
+              transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              src={wagon}
+            />
+            <motion.img
+              animate={{
+                padding: `5px`,
+                paddingRight: `${spread ? '10px' : '5px'}`,
+                paddingLeft: `${spread ? '10px' : '5px'}`,
+              }}
+              transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              src={wagon}
+            />
+            <motion.img
+              animate={{
+                padding: `5px`,
+                paddingRight: `${spread ? '10px' : '5px'}`,
+                paddingLeft: `${spread ? '10px' : '5px'}`,
+              }}
+              transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              src={wagon}
+            />
+            <motion.img
+              animate={{
+                padding: `5px`,
+                paddingRight: `${spread ? '10px' : '5px'}`,
+                paddingLeft: `${spread ? '10px' : '5px'}`,
+              }}
+              transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+              src={wagon}
+            />
+            <motion.img
+              animate={{
+                padding: `5px`,
+                paddingRight: `${spread ? '10px' : '5px'}`,
+                paddingLeft: `${spread ? '10px' : '5px'}`,
+              }}
+              src={locomotive}
+            />
+          </div>
+        </motion.div>
       </div>
-    </div>
+
+      <div className='mt-4 text-center space-x-5'>
+        <button
+          onClick={() => move(-1)} // Set the number of wagons to 6 for example
+          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
+        >
+          Move -1 Wagons
+        </button>
+        <button
+          onClick={() => setSpread((prev) => !prev)} // Set the number of wagons to 6 for example
+          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
+        >
+          Spread
+        </button>
+        <button
+          onClick={() => move(1)} // Set the number of wagons to 6 for example
+          className='px-4 py-2 bg-blue-500 text-white rounded-lg'
+        >
+          Move 1 Wagons
+        </button>
+      </div>
+    </>
   );
 };
