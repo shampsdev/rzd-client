@@ -11,6 +11,7 @@ export const uploadVoice = async (audioBlob: Blob) => {
       },
     });
     console.log("Файл успешно отправлен", response.data);
+    return response.data;
   } catch (error) {
     console.error("Ошибка при отправке файла", error);
   }

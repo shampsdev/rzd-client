@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -21,6 +21,7 @@ import { Cpu, HardDrive, Clock, FileText, Activity } from "lucide-react";
 import { getServerHealth } from "@/api/get.health";
 
 interface HealthData {
+  time: number;
   ram_usage: number;
   cpu_usage: number;
   total_memory: number;
@@ -30,38 +31,37 @@ interface HealthData {
   process_uptime: number;
 }
 
-interface ChartData {
-  time: number;
-  ram: number;
-  cpu: number;
-}
-
 export const DashboardPage = () => {
-  const [healthData, setHealthData] = useState<HealthData | null>(null);
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [healthData, setHealthData] = useState<HealthData[]>([]);
   const [time, setTime] = useState(0);
+  const timeRef = useRef(0); // Use a ref to keep track of time
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getServerHealth();
-        setHealthData(data);
+        const newHealthData: HealthData = {
+          time: timeRef.current, // Use time from ref
+          ram_usage: (data.ram_usage / data.total_memory) * 100,
+          cpu_usage: data.cpu_usage,
+          total_memory: data.total_memory,
+          available_memory: data.available_memory,
+          thread_count: data.thread_count,
+          open_files: data.open_files,
+          process_uptime: data.process_uptime,
+        };
 
-        setChartData((prev) => {
-          const newData = {
-            time: time,
-            ram: data.ram_usage * 100,
-            cpu: data.cpu_usage * 100,
-          };
-
+        setHealthData((prev) => {
           if (prev.length >= 20) {
-            return [...prev.slice(1), newData];
+            return [...prev.slice(1), newHealthData];
           } else {
-            return [...prev, newData];
+            return [...prev, newHealthData];
           }
         });
 
-        setTime((prevTime) => prevTime + 1);
+        // Increment time using the ref
+        timeRef.current += 1;
+        setTime(timeRef.current); // Force a re-render by updating state
       } catch (error) {
         console.error("Error fetching health data", error);
       }
@@ -70,20 +70,22 @@ export const DashboardPage = () => {
     const pollData = async () => {
       while (true) {
         await fetchData();
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     };
 
     pollData();
-  }, [time]);
+  }, []);
 
-  if (!healthData) {
+  if (healthData.length === 0) {
     return (
       <div className='w-full pt-[20%] flex flex-col items-center justify-center'>
         Loading...
       </div>
     );
   }
+
+  const latestData = healthData[healthData.length - 1];
 
   const formatBytes = (bytes: any) => {
     const gb = bytes / (1024 * 1024 * 1024);
@@ -96,6 +98,7 @@ export const DashboardPage = () => {
     const remainingSeconds = Math.floor(seconds % 60);
     return `${hours}h ${minutes}m ${remainingSeconds}s`;
   };
+
   return (
     <div className='p-8 min-h-screen'>
       <h1 className='text-3xl font-bold mb-6'>Server Health Dashboard</h1>
@@ -107,10 +110,10 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>
-              {(healthData.ram_usage * 100).toFixed(2)}%
+              {latestData.ram_usage.toFixed(2)}%
             </div>
             <Progress
-              value={healthData.ram_usage * 100}
+              value={latestData.ram_usage}
               className='mt-2'
             />
           </CardContent>
@@ -122,10 +125,10 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>
-              {(healthData.cpu_usage * 100).toFixed(2)}%
+              {latestData.cpu_usage.toFixed(2)}%
             </div>
             <Progress
-              value={healthData.cpu_usage * 100}
+              value={latestData.cpu_usage}
               className='mt-2'
             />
           </CardContent>
@@ -137,10 +140,10 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>
-              {formatBytes(healthData.available_memory * 1024 * 1024 * 1024)}
+              {formatBytes(latestData.available_memory * 1024 * 1024 * 1024)}
             </div>
             <p className='text-xs text-muted-foreground mt-1'>
-              of {formatBytes(healthData.total_memory * 1024 * 1024 * 1024)}{" "}
+              of {formatBytes(latestData.total_memory * 1024 * 1024 * 1024)}{" "}
               Available
             </p>
           </CardContent>
@@ -154,7 +157,7 @@ export const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>
-              {formatSeconds(healthData.process_uptime)}
+              {formatSeconds(latestData.process_uptime)}
             </div>
           </CardContent>
         </Card>
@@ -182,21 +185,25 @@ export const DashboardPage = () => {
                 width='100%'
                 height='100%'
               >
-                <LineChart data={chartData}>
+                <LineChart data={healthData}>
                   <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='time' />
+                  <XAxis
+                    dataKey='time'
+                    tickFormatter={(value) => `${value}s`}
+                    interval={0}
+                  />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
                   <Line
                     type='monotone'
-                    dataKey='ram'
+                    dataKey='ram_usage'
                     stroke='#82ca9d'
                     name='RAM Usage'
                   />
                   <Line
                     type='monotone'
-                    dataKey='cpu'
+                    dataKey='cpu_usage'
                     stroke='#8884d8'
                     name='CPU Usage'
                   />
@@ -213,7 +220,7 @@ export const DashboardPage = () => {
             <Activity className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{healthData.thread_count}</div>
+            <div className='text-2xl font-bold'>{latestData.thread_count}</div>
           </CardContent>
         </Card>
         <Card>
@@ -222,7 +229,7 @@ export const DashboardPage = () => {
             <FileText className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{healthData.open_files}</div>
+            <div className='text-2xl font-bold'>{latestData.open_files}</div>
           </CardContent>
         </Card>
       </div>

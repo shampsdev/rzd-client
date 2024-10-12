@@ -1,20 +1,37 @@
 import { uploadVoice } from "@/api/post.send.ts";
 import { useRecorder } from "@/hooks/useRecorder";
 import { useEffect, useRef, useState } from "react";
+import { LABELS } from "@/constants/labels";
 
 export const HomePage = () => {
-  const [time, setTime] = useState<number | null>(null); // Время в миллисекундах
+  const [time, setTime] = useState<number | null>(null);
   const [isActive, setIsActive] = useState(false);
-  const { startRecording, stopRecording, audioBlob } = useRecorder();
+  const [responseText, setResponseText] = useState<string | null>(null);
+  const [responseLabel, setResponseLabel] = useState<number | null>(null);
+  const [responseAttribute, setResponseAttribute] = useState<number | null>(
+    null
+  );
 
+  const { startRecording, stopRecording, audioBlob } = useRecorder();
   const startRef = useRef<number | null>(null);
   const requestRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (audioBlob) {
-      console.log("sending");
-      uploadVoice(audioBlob);
-    }
+    const fetchVoiceData = async () => {
+      if (audioBlob) {
+        console.log("sending");
+        const response = await uploadVoice(audioBlob);
+        if (response?.result) {
+          const { text, label, attribute } = response.result;
+          setResponseText(text);
+          setResponseLabel(label);
+          setResponseAttribute(attribute);
+
+          const expectedLabel = LABELS[label];
+        }
+      }
+    };
+    fetchVoiceData();
   }, [audioBlob]);
 
   const updateTimer = (currentTime: number) => {
@@ -61,6 +78,14 @@ export const HomePage = () => {
       </div>
       {time !== null && (
         <p className='mt-5 text-lg'>Таймер: {formatTime(time)}</p>
+      )}
+
+      {responseText && (
+        <div className='mt-5 text-lg'>
+          <p>Распознанный текст: {responseText}</p>
+          <p>Метка: {LABELS[responseLabel ?? -1]}</p>
+          <p>Атрибут: {responseAttribute}</p>
+        </div>
       )}
     </div>
   );
