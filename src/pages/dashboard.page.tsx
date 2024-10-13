@@ -15,6 +15,7 @@ import { motion } from 'framer-motion'; // Import Framer Motion
 import wagon from '../assets/wagon.svg';
 import locomotive from '../assets/locomotive.svg';
 import rails from '../assets/rails.svg';
+import { getStatus, StatusData } from '@/api/get.status';
 
 interface HealthData {
   time: number;
@@ -29,35 +30,49 @@ interface HealthData {
 
 export const DashboardPage = () => {
   const [healthData, setHealthData] = useState<HealthData[]>([]);
+  const [statusData, setStatusData] = useState<StatusData>({
+    status: 'processing',
+  });
+  const [prevStatusData, setPrevStatusData] = useState<StatusData | null>(null);
+
   const [, setTime] = useState(0);
   const timeRef = useRef(0); // Use a ref to keep track of time
-  const [wagonWidth, setWagonWidth] = useState(0);
+  const wagonWidthRef = useRef(0); // Ref to store wagon width
 
   const wagonRef = useRef<HTMLImageElement>(null);
 
-  useEffect(() => {
+  const handleImageLoad = () => {
     if (wagonRef.current) {
       const width = wagonRef.current.getBoundingClientRect().width;
-      setWagonWidth(width); // Set the width of the wagon in state
+      wagonWidthRef.current = width; // Update the ref directly
+
       console.log('Wagon width:', width);
     }
-  }, [wagonRef.current]);
+  };
 
   const [deltaX, setDeltaX] = useState(0);
+  const [spread, setSpread] = useState(false);
+
+  const move = (n: number) => {
+    console.log(n)
+    setDeltaX((prevDeltaX) => {
+      return prevDeltaX + wagonWidthRef.current * n;
+    });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchHealthData = async () => {
       try {
-        const data = await getServerHealth();
+        const healthData = await getServerHealth();
         const newHealthData: HealthData = {
           time: timeRef.current, // Use time from ref
-          ram_usage: (data.ram_usage / data.total_memory) * 100,
-          cpu_usage: data.cpu_usage,
-          total_memory: data.total_memory,
-          available_memory: data.available_memory,
-          thread_count: data.thread_count,
-          open_files: data.open_files,
-          process_uptime: data.process_uptime,
+          ram_usage: (healthData.ram_usage / healthData.total_memory) * 100,
+          cpu_usage: healthData.cpu_usage,
+          total_memory: healthData.total_memory,
+          available_memory: healthData.available_memory,
+          thread_count: healthData.thread_count,
+          open_files: healthData.open_files,
+          process_uptime: healthData.process_uptime,
         };
 
         setHealthData((prev) => {
@@ -76,9 +91,15 @@ export const DashboardPage = () => {
       }
     };
 
+    const fetchStatusData = async () => {
+      const newStatusData = await getStatus();
+      setStatusData(newStatusData);
+    };
+
     const pollData = async () => {
       while (true) {
-        await fetchData();
+        await fetchHealthData();
+        await fetchStatusData();
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     };
@@ -86,10 +107,25 @@ export const DashboardPage = () => {
     pollData();
   }, []);
 
-  const [spread, setSpread] = useState(false);
-  const move = (n: number) => {
-    setDeltaX((prev) => prev + wagonWidth * n);
-  };
+  useEffect(() => {
+    if (statusData.result?.audio === prevStatusData?.result?.audio) return;
+    if (statusData.result?.label == 4) {
+      move(statusData.result.attribute);
+    }
+
+    if (statusData.result?.label == 9) {
+      setSpread(true);
+    }
+
+    if (statusData.result?.label == 16) {
+      setSpread(false);
+    }
+
+    if (statusData.result?.label == 10) {
+      move(-statusData.result.attribute);
+    }
+    setPrevStatusData(statusData);
+  }, [prevStatusData?.result?.audio, statusData]);
 
   if (healthData.length === 0) {
     return (
@@ -243,6 +279,7 @@ export const DashboardPage = () => {
               className='h-full w-full object-fill'
               src={wagon}
               ref={wagonRef}
+              onLoad={handleImageLoad}
             />
             <motion.img
               animate={{
@@ -288,7 +325,7 @@ export const DashboardPage = () => {
             <CardTitle className='font-thin'>audio</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='font-black'>3aafc082-76ff-11ee-8209-c09bf4619c03.mp3</p>
+            <p className='font-black'>{statusData?.result?.audio}</p>
           </CardContent>
         </Card>
         <Card>
@@ -296,7 +333,7 @@ export const DashboardPage = () => {
             <CardTitle className='font-thin'>text</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='font-black'>садить на десять вагонов</p>
+            <p className='font-black'>{statusData?.result?.text}</p>
           </CardContent>
         </Card>
         <Card>
@@ -304,7 +341,7 @@ export const DashboardPage = () => {
             <CardTitle className='font-thin'>label</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='font-black'>4</p>
+            <p className='font-black'>{statusData?.result?.label}</p>
           </CardContent>
         </Card>
         <Card>
@@ -312,7 +349,7 @@ export const DashboardPage = () => {
             <CardTitle className='font-thin'>attribute</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='font-black'>10</p>
+            <p className='font-black'>{statusData?.result?.attribute}</p>
           </CardContent>
         </Card>
       </div>

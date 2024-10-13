@@ -1,10 +1,10 @@
 <svg width="1077" height="441" viewBox="0 0 1077 441" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M30 72H9V330H0V357H39V330H30V72Z" fill="#222525"/>
+<path fillRule="evenodd" clipRule="evenodd" d="M30 72H9V330H0V357H39V330H30V72Z" fill="#222525"/>
 <rect width="9" height="258" transform="matrix(-1 0 0 1 9 72)" fill="#222525"/>
 <rect width="1077" height="12" transform="matrix(-1 0 0 1 1077 357)" fill="#222525"/>
 <rect width="981" height="18" transform="matrix(-1 0 0 1 1029 369)" fill="#222525"/>
 <rect width="9" height="258" transform="matrix(-1 0 0 1 39 72)" fill="#222525"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M1068 72H1047V330H1038V357H1077V330H1068V72Z" fill="#222525"/>
+<path fillRule="evenodd" clipRule="evenodd" d="M1068 72H1047V330H1038V357H1077V330H1068V72Z" fill="#222525"/>
 <rect width="9" height="258" transform="matrix(-1 0 0 1 1047 72)" fill="#222525"/>
 <rect width="9" height="258" transform="matrix(-1 0 0 1 1077 72)" fill="#222525"/>
 <rect width="981" height="9" transform="matrix(-1 0 0 1 1029 72)" fill="#C9D1D5"/>
